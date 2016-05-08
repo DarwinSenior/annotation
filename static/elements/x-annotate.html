@@ -1,0 +1,74 @@
+<script src="../src/canvas.js"></script>
+
+<dom-module id="x-annotate">
+    <style>
+        :host {
+            display: block;
+            position: relative;
+        }
+
+        .canvas {
+            position: absolute;
+        }
+        #annotationlayer{
+            opacity: 0.5;
+        }
+    </style>
+    <template>
+        <canvas id="imagelayer" class="canvas" height="{{height}}" width="{{width}}"></canvas>
+        <canvas id="annotationlayer" class="canvas" height="{{height}}" width="{{width}}"></canvas>
+    </template>
+    <script>
+        Polymer({
+            is: 'x-annotate',
+
+            observers: ['updateImage(imageurl)', 'updateStroke(strokesize)'],
+
+            properties: {
+                strokesize: Number,
+                height: Number,
+                width: Number,
+                imageurl: String,
+            },
+            attached: function() {
+                this.img = new Image();
+                this.img.onload = this.update.bind(this);
+                canvas_draw(this.$.annotationlayer);
+                this.updateImage(this.imageurl || '');
+                this.updateStroke(this.strokesize);
+            },
+            clear: function() {
+                const ctx = this.$.annotationlayer.getContext('2d');
+                ctx.clearRect(0, 0, this.width, this.height);
+            },
+            contour: function() {
+                let outlinePointss = MarchingSquares.getBlobOutlinePoints(this.$.annotationlayer);
+                const ctx = this.$.annotationlayer.getContext('2d');
+                ctx.fillStyle = 'green';
+                console.log(outlinePointss);
+                let outlinePoints = outlinePointss[0];
+                for (var i = 0; i < outlinePoints.length; i += 2) {
+                    ctx.fillRect(outlinePoints[i], outlinePoints[i+1], 1, 1);
+                }
+            },
+            load: function() {
+                // this will load a new canvas
+            },
+            update: function() {
+                this.$.imagelayer.getContext('2d').drawImage(this.img, 0, 0, this.width, this.height);
+                this.clear();
+            },
+            updateImage: function(imageurl) {
+                if (this.img) {
+                    this.img.src = imageurl;
+                }
+            },
+            updateStroke: function(strokesize) {
+                const ctx = this.$.annotationlayer.getContext('2d');
+                ctx.lineWidth = strokesize;
+                let curosr_style = 'url(' + cursor_data(strokesize + 3, strokesize + 3) + '), auto'
+                d3.select(this.$.annotationlayer).style('cursor', curosr_style);
+            },
+        })
+    </script>
+</dom-module>

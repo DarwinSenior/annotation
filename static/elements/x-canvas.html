@@ -1,0 +1,51 @@
+<link rel="import" href="elements.html">
+<dom-module id="x-canvas">
+    <style include="iron-flex"></style>
+    <style>
+        :host {
+            display: block;
+            width: 500px;
+        }
+
+        #subbar {
+            width: 100%;
+        }
+    </style>
+    <template>
+        <div class="layout horizontal">
+            <div id="videocontainer">
+                <video
+                    id="video"
+                    width="{{width}}" height="{{height}}"
+                    controls>
+                    <source type="video/mp4" src="{{videosrc}}"></source>
+                </video>
+            </div>
+            <x-annotate
+                height="{{height}}"
+                width="{{width}}"
+                strokesize="{{strokesize}}"
+                imageurl="[[imgurl(framenumber)]]">
+            </x-annotate>
+        </div>
+        <x-control strokesize="{{strokesize}}" framenumber="{{framenumber}}" maxframe="22" minframe="1"></x-control>
+    </template>
+    <script>
+        Polymer({
+            is: 'x-canvas',
+            properties: {
+                strokesize: Number,
+                height: Number,
+                width: Number,
+                videosrc: String,
+                framenumber: Number,
+            },
+            attached: function() {
+                this.framenumber = 1;
+            },
+            imgurl: function(framenumber) {
+                return "/static/images/img" + ('000' + framenumber).slice(-3) + '.png';
+            }
+        });
+    </script>
+</dom-module>

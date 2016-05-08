@@ -1,0 +1,74 @@
+<link rel="import" href="elements.html">
+<dom-module id="x-control">
+    <style include="iron-flex"></style>
+    <style>
+        :host {
+            display: block;
+        }
+        .frametext{
+            text-align: center;
+        }
+    </style>
+    <template>
+        <div class="layout vertical">
+            <div class="layout horizontal">
+              <span>stroke size</span>
+              <paper-slider pin min="1" max="30" value="{{strokesize}}"></paper-slider>
+              <svg id="sample" height="30" width="30">
+                  <circle cx="15" cy="15" fill="blue"></circle>
+              </svg>
+            </div>
+            <div class="layout horizontal">
+                <paper-icon-button
+                    disabled="{{isfirst(framenumber)}}"
+                    icon="icons:chevron-left"
+                    on-click="before">
+                </paper-icon-button>
+                <div class="flex frametext">
+                    Current Frame <span>{{framenumber}}</span>
+                </div>
+                <paper-icon-button
+                    disabled="{{islast(framenumber)}}"
+                    icon="icons:chevron-right"
+                    on-click="next">
+                </paper-icon-button>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'x-control',
+            properties: {
+                strokesize: {
+                    notify: true,
+                    type: Number,
+                    observer: 'strokeChanged',
+                },
+                framenumber: {
+                    notify: true,
+                    type: Number,
+                },
+                maxframe: Number,
+                minframe: Number,
+            },
+            attached: function(){
+                this.framenumber = this.minframe;
+            },
+            strokeChanged: function(strokesize) {
+                d3.select(this.$.sample).select('circle').attr('r', strokesize);
+            },
+            next: function() {
+                this.framenumber = Math.min(this.framenumber + 1, this.maxframe);
+            },
+            before: function() {
+                this.framenumber = Math.max(this.framenumber - 1, this.minframe);
+            },
+            isfirst: function(framenumber){
+                return framenumber == this.minframe;
+            },
+            islast: function(framenumber){
+                return framenumber == this.maxframe;
+            }
+        })
+    </script>
+</dom-module>
